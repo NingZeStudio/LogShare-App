@@ -8,6 +8,12 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
+// 版本号默认保持原值；发布流程可通过 -PappVersionCode= / -PappVersionName= 注入。
+// versionCode 每次发布必须递增，否则应用商店会拒收。
+// 在脚本顶层求值，避免在 android {} 委托块内解析 project 引发歧义。
+def appVersionCode = (project.findProperty("appVersionCode") ?: "1").toString().toInteger()
+def appVersionName = (project.findProperty("appVersionName") ?: "1.0").toString()
+
 android {
     namespace = "cn.logshare.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -15,8 +21,8 @@ android {
         applicationId "cn.logshare.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
