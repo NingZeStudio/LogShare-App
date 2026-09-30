@@ -107,9 +107,14 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
-      - name: 同步 web 产物到 Android 工程
+      # 必须用 sync（= copy + update）而不是 copy：
+      # capacitor-cordova-android-plugins/ 是被 gitignore 的生成物，全新检出时不存在；
+      # 而 app/capacitor.build.gradle 第 10 行会 apply 其中的 cordova.variables.gradle，
+      # 只跑 copy 会让 gradle 评估阶段直接报 "Could not read script ... does not exist"。
+      # sync 内部的 capacitor update 会重建该目录与这些配置文件。
+      - name: 同步 web 产物与原生产物
         working-directory: frontend
-        run: pnpm exec cap copy android
+        run: pnpm exec cap sync android
 
       - name: 构建 debug APK
         working-directory: frontend/android
