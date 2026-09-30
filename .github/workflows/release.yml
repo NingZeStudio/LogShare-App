@@ -250,13 +250,25 @@ jobs:
         with:
           path: artifacts
 
+      # 统一改名为无空格规范名：electron-builder 的产物名来自 productName（含空格），
+      # 而 GitHub 上传资产时会把空格替换成点，导致实际资产名（LogShare.Setup.1.0.0-rc.1.exe）
+      # 与说明文档里写的名字对不上。显式改名后不再依赖 GitHub 的这一隐式行为。
       - name: 整理发布产物
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
+          set -euo pipefail
           mkdir -p release-assets
-          find artifacts -type f \( -name '*.apk' -o -name '*.exe' \) ! -name '*.blockmap' \
-            -exec cp {} release-assets/ \;
-          echo "待发布文件："
+          find artifacts -type f -name '*.apk' \
+            -exec cp {} "release-assets/LogShare-${VERSION}-release.apk" \;
+          find artifacts -type f -name '*Setup*.exe' ! -name '*.blockmap' \
+            -exec cp {} "release-assets/LogShare-Setup-${VERSION}.exe" \;
+          find artifacts -type f -name '*.exe' ! -name '*Setup*' ! -name '*.blockmap' \
+            -exec cp {} "release-assets/LogShare-Portable-${VERSION}.exe" \;
+          count=$(find release-assets -type f | wc -l)
+          echo "待发布文件（$count 个）："
           ls -lh release-assets/
+          [ "$count" -gt 0 ] || { echo "::error::没有收集到任何产物"; exit 1; }
 
       # 用带占位符的引号 heredoc 再 sed 替换，避免反引号/变量在 shell 里被意外展开
       - name: 生成 Release 说明
@@ -273,8 +285,8 @@ jobs:
           | 平台 | 文件 | 说明 |
           |---|---|---|
           | Android | `LogShare-__VERSION__-release.apk` | 已签名（v2 方案），minSdk 24（Android 7.0+） |
-          | Windows | `LogShare Setup __VERSION__.exe` | NSIS 安装包 |
-          | Windows | `LogShare __VERSION__.exe` | 便携版，免安装 |
+          | Windows | `LogShare-Setup-__VERSION__.exe` | NSIS 安装包 |
+          | Windows | `LogShare-Portable-__VERSION__.exe` | 便携版，免安装 |
 
           ### 签名说明
 
@@ -288,21 +300,34 @@ jobs:
           apksigner verify --print-certs LogShare-__VERSION__-release.apk
 
           # Windows（PowerShell）
-          Get-AuthenticodeSignature "LogShare Setup __VERSION__.exe"
+          Get-AuthenticodeSignature "LogShare-Setup-__VERSION__.exe"
           ```
           EOF
           sed -i "s/__VERSION__/${VERSION}/g" notes.md
           echo "说明已生成（$(wc -l < notes.md) 行）"
 
-      - name: 创建预发布 Release
+      # 幂等：Release/tag 已存在时改为覆盖资产并更新说明，
+      # 这样某次发布跑挂后可以直接重跑，不必先手工删 tag
+      - name: 创建或更新预发布 Release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          REPO: ${{ github.repository }}
         run: |
-          gh release create "v${VERSION}" \
-            --repo "${{ github.repository }}" \
-            --target "${{ github.sha }}" \
-            --title "LogShare v${VERSION}（预发布）" \
-            --notes-file notes.md \
-            --prerelease \
-            release-assets/*
+          set -euo pipefail
+          TAG="v${VERSION}"
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
+            echo "Release $TAG 已存在 —— 覆盖上传资产并更新说明"
+            gh release upload "$TAG" release-assets/* --clobber --repo "$REPO"
+            gh release edit "$TAG" --notes-file notes.md --prerelease --repo "$REPO"
+          else
+            echo "创建 Release $TAG"
+            gh release create "$TAG" \
+              --repo "$REPO" \
+              --target "${{ github.sha }}" \
+              --title "LogShare ${TAG}（预发布）" \
+              --notes-file notes.md \
+              --prerelease \
+              release-assets/*
+          fi
+          echo "完成：$(gh release view "$TAG" --repo "$REPO" --json url --jq .url)"
