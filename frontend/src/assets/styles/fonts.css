@@ -1,0 +1,49 @@
+/* 界面比例字体：HarmonyOS Sans SC（自托管常用汉字+ASCII 子集，缺字回退系统字体） */
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('../fonts/HMSans-Regular.subset.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('../fonts/HMSans-Medium.subset.woff2') format('woff2');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 等宽代码字体：SauceCode Mono（4 档字重） */
+@font-face {
+  font-family: 'SauceCode Mono';
+  src: url('../fonts/SauceCodeMono-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SauceCode Mono';
+  src: url('../fonts/SauceCodeMono-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SauceCode Mono';
+  src: url('../fonts/SauceCodeMono-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SauceCode Mono';
+  src: url('../fonts/SauceCodeMono-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

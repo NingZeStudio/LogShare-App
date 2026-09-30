@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LogShare</string>
+    <string name="title_activity_main">LogShare</string>
+    <string name="package_name">cn.logshare.app</string>
+    <string name="custom_url_scheme">cn.logshare.app</string>
+</resources>

@@ -1,0 +1,123 @@
+/* ============================================================
+ * 日志查看器样式（§ 颜色码 + 级别高亮 + 搜索 mark）
+ * 对齐网页版 LogShare-Web-UI 的日志渲染；普通 CSS（不用 @layer，
+ * Tailwind 3 无原生 @layer，分层类会被 purge）。
+ * ============================================================ */
+
+/* —— Minecraft § 颜色码（16 色固定，不随主题变） —— */
+.format-black { color: #000000; }
+.format-darkblue { color: #0000aa; }
+.format-darkgreen { color: #00aa00; }
+.format-darkaqua { color: #00aaaa; }
+.format-darkred { color: #aa0000; }
+.format-darkpurple { color: #aa00aa; }
+.format-gold { color: #ffaa00; }
+.format-gray { color: #aaaaaa; }
+.format-darkgray { color: #555555; }
+.format-blue { color: #5555ff; }
+.format-green { color: #55ff55; }
+.format-aqua { color: #55ffff; }
+.format-red { color: #ff5555; }
+.format-lightpurple { color: #ff55ff; }
+.format-yellow { color: #ffff55; }
+.format-white { color: #ffffff; }
+
+/* 格式码 */
+.format-bold { font-weight: 700; }
+.format-italic { font-style: italic; }
+.format-underline { text-decoration: underline; }
+.format-strike { text-decoration: line-through; }
+.format-reset {
+  color: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  text-decoration: inherit;
+}
+
+/* —— 日志表格 —— */
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.log-table .line-num {
+  width: 2.75rem;
+  text-align: right;
+  padding: 0 0.625rem;
+  color: #6b7280;
+  vertical-align: top;
+  user-select: none;
+  -webkit-user-select: none;
+  border-right: 1px solid var(--log-border, #3d3d3d);
+  white-space: nowrap;
+}
+
+.log-table .log-content {
+  padding: 0 0.625rem;
+  vertical-align: top;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+/* 级别行背景（明暗两套） */
+.log-row.bg-error-group {
+  background: rgba(239, 68, 68, 0.12);
+}
+.log-row.bg-warning-group {
+  background: rgba(245, 158, 11, 0.12);
+}
+.dark .log-row.bg-error-group {
+  background: rgba(239, 68, 68, 0.18);
+}
+.dark .log-row.bg-warning-group {
+  background: rgba(245, 158, 11, 0.18);
+}
+
+.log-row:hover .line-num,
+.log-row:hover .log-content {
+  background: var(--log-bg-hover, #4a4a4a);
+}
+
+/* 仅错误模式：隐藏非错误行 */
+.show-errors-only .log-row.entry-no-error {
+  display: none;
+}
+
+/* 不换行模式：单行横向滚动 */
+.log-no-wrap .log-content {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* 搜索匹配高亮 */
+.log-table mark {
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.dark .log-table mark {
+  background: #60a5fa;
+  color: #000000;
+}
+
+/* 流式 AI 光标（§ 正文区复用） */
+@keyframes ai-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.ai-streaming-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: ai-cursor-blink 0.9s steps(2) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-streaming-cursor { animation: none; }
+}

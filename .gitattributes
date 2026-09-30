@@ -1,0 +1,19 @@
+# 统一换行符：仓库内存 LF，避免 Windows / macOS / Linux 协作时产生整文件 diff
+* text=auto eol=lf
+
+# 二进制文件不做任何换行符转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.icns binary
+*.woff binary
+*.woff2 binary
+*.wasm binary
+*.apk  binary
+*.exe  binary
+
+# 构建产物在 GitHub 语言统计中不计入（避免把生成物当源码）
+electron/renderer/** linguist-generated=true
+frontend/android/app/src/main/assets/public/** linguist-generated=true

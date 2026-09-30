@@ -1,0 +1,56 @@
+# ---- 依赖 ----
+node_modules/
+.pnpm-store/
+
+# ---- 构建产物 ----
+# 根目录打包产物（安装包 / 便携版 / win-unpacked，体积很大，不入库）
+/dist/
+# 前端构建输出（Electron 与 Android 共用同一份，由 vite 生成）
+/electron/renderer/
+/frontend/dist/
+
+# ---- Android / Capacitor ----
+frontend/android/app/build/
+frontend/android/build/
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/app/src/main/assets/public/
+frontend/android/app/src/main/assets/capacitor.config.json
+frontend/android/app/src/main/assets/capacitor.plugins.json
+*.apk
+*.aab
+
+# ---- 签名与密钥（绝不入库）----
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.mobileprovision
+key.properties
+key.properties.*
+*.env
+.env
+.env.*
+!.env.example
+
+# ---- 编辑器 / 系统 ----
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 日志与临时文件 ----
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+.eslintcache
+
+# ---- AI 助手本地工作区（含对话记忆，不随源码分发）----
+.workbuddy/
+.codebuddy/

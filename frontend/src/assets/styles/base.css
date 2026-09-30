@@ -1,0 +1,159 @@
+@layer base {
+  :root {
+    /* 基础明亮模式 - 低饱和度冷灰阶 */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    /* 7 档圆角阶梯 */
+    --radius: 0.5rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* 日志/代码区暗黑沉浸配色（亮色下保持深色终端感） */
+    --log-bg: #2a2a2a;
+    --log-border: #3d3d3d;
+    --log-bg-hover: #4a4a4a;
+    --log-code-bg: #1e1e1e;
+  }
+
+  .dark {
+    /* 暗黑模式 - Zinc/Slate 冷灰深度融合 */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    /* 暗色模式终端配色 */
+    --log-bg: #10141d;
+    --log-border: #232a38;
+    --log-bg-hover: #1a2130;
+    --log-code-bg: #0d1117;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  /* 全站横向溢出兜底：任何长内容（表格/代码块/超长文本）不得把页面撑出横向滚动。
+     clip 不生成滚动上下文，sticky 吸顶不受任何破坏 */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Phosphor 图标视窗留白大（256 vs 24），同尺寸下显小，统一放大补偿 */
+  svg[viewBox='0 0 256 256'] {
+    scale: 1.2;
+    transform-origin: center;
+  }
+}
+
+@layer utilities {
+  /* 全站过渡统一赋予微弱回弹阻尼感，消除机械生硬感 */
+  .transition-all,
+  .transition-colors,
+  .transition-opacity,
+  .transition-transform,
+  .transition-shadow,
+  .transition {
+    transition-timing-function: cubic-bezier(0.34, 1.7, 0.64, 1);
+  }
+}
+
+/* 统一细滚动条：代码块与表格的横向滚动窄轨 + 半透明拇指 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}

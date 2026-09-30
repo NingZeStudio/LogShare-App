@@ -1,0 +1,117 @@
+/**
+ * 移动端专项样式
+ *
+ * 刻意不使用 @layer：Tailwind 会 purge 掉「未被用到」的分层自定义类，
+ * 而这些安全区 / 触摸相关的类需要稳定存在（且需要压过 utilities 层的字号设置）。
+ * 非分层 CSS 优先级高于任何 @layer，因此这里写普通规则最可靠。
+ */
+
+/* ------------------------------------------------------------------
+   1. 触摸交互基础
+   ------------------------------------------------------------------ */
+
+/* 去掉移动端点击时的灰色高亮方块，改由组件自身的 :active 反馈 */
+@media (hover: none) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* manipulation 去掉双击缩放的 300ms 点击延迟，同时保留双指缩放（无障碍） */
+  button,
+  a,
+  [role='button'],
+  label,
+  summary {
+    touch-action: manipulation;
+  }
+}
+
+/* 横竖屏切换时禁止 WebKit 擅自调整字号 */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 移动端下拉刷新与橡皮筋回弹会顶乱固定底栏，这里收住纵向 overscroll */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* ------------------------------------------------------------------
+   2. iOS 聚焦缩放
+   字号 < 16px 的输入控件被聚焦时，iOS Safari 会把整个页面放大且不还原。
+   小屏下统一抬到 16px 规避。
+   ------------------------------------------------------------------ */
+@media screen and (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   3. 安全区（刘海屏 / 底部手势条）
+   依赖 index.html 的 viewport-fit=cover 才生效，未覆盖时为 0px 不产生影响。
+   ------------------------------------------------------------------ */
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* 安全区 + 常用间距：底部操作栏用来避开手势条 */
+.pb-safe-1 {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
+}
+
+.pb-safe-2 {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+}
+
+.pb-safe-3 {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+}
+
+.pb-safe-4 {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+}
+
+/* 左右也要避开横向安全区（横屏刘海） */
+.px-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* ------------------------------------------------------------------
+   4. 触摸目标
+   iOS HIG / Material 都建议最小 44×44pt，低于此值容易点不中。
+   组件里的 size="sm" 只有 28px 高，这里在触摸设备/窄屏下抬到 44px。
+
+   用媒体查询而不是无条件生效，避免把桌面端的紧凑尺寸也一起改高。
+   条件同时包含「触摸设备」与「窄屏」：
+   前者覆盖平板，后者覆盖 DevTools 设备模拟等不设置 hover 能力的环境。
+   ------------------------------------------------------------------ */
+
+@media (hover: none) and (pointer: coarse), (max-width: 639px) {
+  .touch-target {
+    min-height: 2.75rem; /* 44px */
+    min-width: 2.75rem;
+  }
+
+  /* 仅抬高可点高度、不限宽（用于文字按钮） */
+  .touch-h {
+    min-height: 2.75rem;
+  }
+}

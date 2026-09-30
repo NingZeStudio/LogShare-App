@@ -1,0 +1,63 @@
+{
+  "name": "logshare-app",
+  "version": "1.0.0",
+  "description": "LogShare.CN 跨平台桌面客户端 — Minecraft 日志分享与分析",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "LOGSHARE_DEV=1 electron .",
+    "build:frontend": "cd ../frontend && pnpm install && pnpm build",
+    "dist": "npm run build:frontend && electron-builder",
+    "dist:win": "npm run build:frontend && electron-builder --win",
+    "dist:mac": "npm run build:frontend && electron-builder --mac",
+    "dist:linux": "npm run build:frontend && electron-builder --linux"
+  },
+  "build": {
+    "appId": "cn.logshare.app",
+    "productName": "LogShare",
+    "directories": {
+      "output": "../dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "log",
+        "name": "LogShare 日志文件",
+        "description": "Minecraft 日志文件，可用 LogShare 打开分析",
+        "icon": "build/icon.ico",
+        "role": "Editor"
+      },
+      {
+        "ext": "logs",
+        "name": "LogShare 日志文件",
+        "description": "Minecraft 日志文件，可用 LogShare 打开分析",
+        "icon": "build/icon.ico",
+        "role": "Editor"
+      }
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Development"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0"
+  }
+}

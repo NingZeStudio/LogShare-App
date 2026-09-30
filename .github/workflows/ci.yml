@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+# 最小权限：CI 只读代码
+permissions:
+  contents: read
+
+# 同一分支的新推送取消上一次未完成的运行，避免排队浪费
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── 前端：Lint / 类型检查 / 构建 ────────────────────────────────
+  frontend:
+    name: 前端 Lint · 类型检查 · 构建
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      # 版本与本地一致（pnpm 12 / node 22 / lockfile v9），避免锁文件解释差异
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: pnpm lint
+
+      # 构建脚本为 vue-tsc -b && vite build，类型检查不过即失败
+      - name: 类型检查与构建
+        run: pnpm build
+
+      - name: 校验构建产物
+        run: test -f ../electron/renderer/index.html
+
+  # ── Electron 壳层：语法校验 ────────────────────────────────────
+  electron-shell:
+    name: Electron 壳层语法校验
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: main.js / preload.js 语法校验
+        working-directory: electron
+        run: |
+          node --check main.js
+          node --check preload.js
+
+  # ── Android：web 产物同步 + debug APK 构建 ─────────────────────
+  # PR 不跑（耗时较长），push 到主分支或手动触发时执行
+  android:
+    name: Android debug 构建
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    needs: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # gradle-wrapper.properties 的 distributionUrl 指向腾讯云镜像（国内加速），
+      # 海外 runner 拉取不可靠；这里显式安装同版本发行版并改用 gradle 命令。
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0'
+
+      - name: 安装依赖并构建 web 产物
+        working-directory: frontend
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: 同步 web 产物到 Android 工程
+        working-directory: frontend
+        run: pnpm exec cap copy android
+
+      - name: 构建 debug APK
+        working-directory: frontend/android
+        run: gradle assembleDebug --no-daemon
+
+      - name: 上传 APK 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: logshare-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
