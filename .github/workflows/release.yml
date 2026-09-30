@@ -117,9 +117,14 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
           echo "APK 已签名并校验通过"
 
+      # 必须用块标量而非 `run: cmd \` 续行：YAML 单行标量会把换行折叠成
+      # 转义空格，命令会变成 `cp a " b"` —— 目标文件名多一个前导空格，
+      # cp 照样成功退出，但产物名与预期不符，上传时才报找不到文件。
       - name: 归档产物
-        run: cp frontend/android/app/build/outputs/apk/release/app-release.apk \
-                "LogShare-${{ inputs.version }}-release.apk"
+        run: |
+          OUT="LogShare-${{ inputs.version }}-release.apk"
+          cp frontend/android/app/build/outputs/apk/release/app-release.apk "$OUT"
+          ls -lh "$OUT"
 
       - name: 清理签名材料
         if: always()
@@ -128,7 +133,10 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: logshare-release-apk
+          # 用大写 LogShare 前缀：密钥值 ANDROID_KEY_ALIAS 为小写 "logshare"，
+          # GitHub 会把日志/UI 里出现的该字符串统一打码成 ***，产物名会被显示成
+          # "***-release-apk"，徒增困惑
+          name: LogShare-release-apk
           path: LogShare-${{ inputs.version }}-release.apk
           if-no-files-found: error
           retention-days: 30
@@ -212,7 +220,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: logshare-windows-${{ inputs.version }}
+          name: LogShare-windows-${{ inputs.version }}
           path: |
             dist/*.exe
           if-no-files-found: error
